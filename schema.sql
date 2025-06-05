@@ -6,8 +6,8 @@ CREATE TABLE stations (
 
 -- Tabela wypożyczeń
 CREATE TABLE rentals (
-    rental_id TEXT PRIMARY KEY,
-    bike_number TEXT NOT NULL,
+    rental_id TEXT PRIMARY KEY, --why not INTEGER?
+    bike_number TEXT NOT NULL, --why not INTEGER?
     start_time DATETIME,
     end_time DATETIME,
     duration INTEGER,

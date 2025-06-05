@@ -16,7 +16,7 @@ def load_csv_to_db(csv_path, db_path):
     with open(csv_path, encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            rental_id = row["UID wynajmu"]
+            rental_id = row["UID wynajmu"] #move to db_utils
             bike_number = row["Numer roweru"]
             start_time = parse_datetime(row["Data wynajmu"])
             end_time = parse_datetime(row["Data zwrotu"])
@@ -55,18 +55,26 @@ def get_or_create_station(session, name):
     return station
 
 
-def parse_datetime(dt_str):
+def parse_datetime(dt_str): #move to db_utils
     try:
         return datetime.strptime(dt_str, "%Y-%m-%d %H:%M:%S")
     except Exception:
         return None
 
 
-def load_all(directory='data', db='rentals'):
+def load_all(directory='data', db='rentals'): #move to db_utils
     for file in os.listdir(directory):
         if file.endswith(".csv"):
             load_csv_to_db(os.path.join(directory, file), db)
 
+def load_one(directory='data', db='rentals'): #DELETE THIS TESTS ONLY
+    i=0
+    for file in os.listdir(directory):
+        if i > 0:
+            break
+        i+=1
+        if file.endswith(".csv"):
+            load_csv_to_db(os.path.join(directory, file), db)
 
 if __name__ == "__main__":
     '''if len(sys.argv) != 3:
@@ -77,4 +85,5 @@ if __name__ == "__main__":
     db_name = sys.argv[2]
     load_csv_to_db(csv_file, db_name)'''
 
-    load_all()
+    #load_all()
+    load_one()

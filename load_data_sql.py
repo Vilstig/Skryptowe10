@@ -5,7 +5,7 @@ import sqlite3
 from datetime import datetime
 
 
-def parse_datetime(dt_str):
+def parse_datetime(dt_str): #move to db_utils
     try:
         return datetime.strptime(dt_str, "%Y-%m-%d %H:%M:%S").isoformat()
     except Exception:
@@ -32,7 +32,7 @@ def load_csv_to_db(csv_path, db_path):
     with open(csv_path, encoding="utf-8") as f:
         reader = csv.DictReader(f)
 
-        for row in reader:
+        for row in reader: #maybe move extracting the values to db_utils? the function could return all the vars as a tuple, then wed assign them to vars here. We could even use the ready tuple in the sql code
             rental_id = row["UID wynajmu"]
             bike_number = row["Numer roweru"]
             start_time = parse_datetime(row["Data wynajmu"])
@@ -62,7 +62,7 @@ def load_csv_to_db(csv_path, db_path):
     conn.close()
     print(f"Załadowano dane z {csv_path} do bazy {db_path}.sqlite3")
 
-def load_all(directory='data', db='rentals_sql'):
+def load_all(directory='data', db='rentals_sql'): #move to db_utils
     for file in os.listdir(directory):
         if file.endswith(".csv"):
             load_csv_to_db(os.path.join(directory, file), db)

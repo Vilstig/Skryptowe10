@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Analiza stacji</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container d-flex flex-column align-items-center mt-5">
+        <h1 class="mb-4 text-center">Wybierz stację</h1>
+
+        <form method="post" class="text-center w-100" style="max-width: 400px;">
+            <select name="station_id" class="form-select mb-3" required>
+                <option value="">-- wybierz stację --</option>
+                {% for station in stations %}
+                    <option value="{{ station.station_id }}"
+                        {% if request.form.station_id == station.station_id|string %}selected{% endif %}>
+                        {{ station.station_name }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <div class="d-grid gap-2">
+                <button type="submit" name="action" value="avg_start" class="btn btn-primary">Średni czas - rozpoczęcie</button>
+                <button type="submit" name="action" value="avg_end" class="btn btn-secondary">Średni czas - zakończenie</button>
+                <button type="submit" name="action" value="unique_bikes" class="btn btn-success">Liczba różnych rowerów</button>
+                <button type="submit" name="action" value="round_trips" class="btn btn-warning">Wypożyczenia z powrotem</button>
+            </div>
+        </form>
+
+        {% if result %}
+            <div class="alert alert-info mt-4 text-center w-100" style="max-width: 400px;">
+                <h4 class="alert-heading">{{ station_name }}:</h4>
+                <p>{{ result }}</p>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
