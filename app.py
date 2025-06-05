@@ -2,14 +2,14 @@ from flask import Flask, render_template, request
 import sqlite3
 
 app = Flask(__name__)
-DATABASE = 'rentals.sqlite3'
+DATABASE = 'rentals_sql.sqlite3'
 
 def get_stations():
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
     stations = conn.execute("SELECT station_id, station_name FROM stations ORDER BY station_name").fetchall()
     conn.close()
-    return stations
+    return sorted([{'station_id': row[0], 'station_name': row[1]} for row in stations], key=lambda s: s['station_name'].lower())
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -20,20 +20,18 @@ def index():
     selected_station_name = None
 
     if request.method == 'POST' and selected_station_id and button:
-        selected_station_name = next(
-            (s['station_name'] for s in stations if str(s['station_id']) == selected_station_id), None
-        )
+        selected_station_name = next((s['station_name'] for s in stations if str(s['station_id']) == selected_station_id), None)
 
         conn = sqlite3.connect(DATABASE)
         cur = conn.cursor()
 
         if button == 'avg_start':
             cur.execute("SELECT AVG(duration) FROM rentals WHERE rental_station = ?", (selected_station_id,))
-            result = f"Średni czas rozpoczęcia: {round(cur.fetchone()[0] or 0, 2)} min"
+            result = f"Średni czas rozpoczętych przejazdów: {round(cur.fetchone()[0] or 0, 2)} min"
 
         elif button == 'avg_end':
             cur.execute("SELECT AVG(duration) FROM rentals WHERE return_station = ?", (selected_station_id,))
-            result = f"Średni czas zakończenia: {round(cur.fetchone()[0] or 0, 2)} min"
+            result = f"Średni czas zakończenych przejazdów: {round(cur.fetchone()[0] or 0, 2)} min"
 
         elif button == 'unique_bikes':
             cur.execute("SELECT COUNT(DISTINCT bike_number) FROM rentals WHERE return_station = ?", (selected_station_id,))

@@ -1,10 +1,9 @@
 import csv
 import os
-import sys
-from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import Station, Rental
+from db_utils import parse_row, load_all
 
 
 def load_csv_to_db(csv_path, db_path):
@@ -16,17 +15,7 @@ def load_csv_to_db(csv_path, db_path):
     with open(csv_path, encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            rental_id = row["UID wynajmu"] #move to db_utils
-            bike_number = row["Numer roweru"]
-            start_time = parse_datetime(row["Data wynajmu"])
-            end_time = parse_datetime(row["Data zwrotu"])
-            duration = row['Czas trwania']
-
-            start_station_name = row["Stacja wynajmu"]
-            end_station_name = row["Stacja zwrotu"]
-
-            start_station = get_or_create_station(session, start_station_name)
-            end_station = get_or_create_station(session, end_station_name)
+            rental_id, bike_number, start_time, end_time, duration, start_station, end_station = parse_row(row, session, get_or_create_station)
 
             rental = Rental(
                 rental_id=rental_id,
@@ -38,7 +27,7 @@ def load_csv_to_db(csv_path, db_path):
                 return_station=end_station.station_id if end_station else None,
             )
 
-            session.merge(rental)
+        session.merge(rental)
         session.commit()
         session.close()
         print(f"Dane z {csv_path} załadowane do bazy {db_path}.sqlite3")
@@ -54,20 +43,7 @@ def get_or_create_station(session, name):
         session.commit()
     return station
 
-
-def parse_datetime(dt_str): #move to db_utils
-    try:
-        return datetime.strptime(dt_str, "%Y-%m-%d %H:%M:%S")
-    except Exception:
-        return None
-
-
-def load_all(directory='data', db='rentals'): #move to db_utils
-    for file in os.listdir(directory):
-        if file.endswith(".csv"):
-            load_csv_to_db(os.path.join(directory, file), db)
-
-def load_one(directory='data', db='rentals'): #DELETE THIS TESTS ONLY
+def load_one(directory='data', db='rentals'): # DESTINED FOR TESTING
     i=0
     for file in os.listdir(directory):
         if i > 0:
@@ -85,5 +61,5 @@ if __name__ == "__main__":
     db_name = sys.argv[2]
     load_csv_to_db(csv_file, db_name)'''
 
-    #load_all()
-    load_one()
+    load_all(directory='data', db='rentals', load_func=load_csv_to_db)
+    #load_one()
